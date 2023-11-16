@@ -1,0 +1,31 @@
+<form action="/login" method="post">
+  ID : <input type="text" name="id"><br>
+  PW : <input type="password" name="pw"><br>
+  NAME : <input type="text" name="name"><br>
+  <!-- <input type="submit" value="로그인"> -->
+  <input type="submit" value="로그인">
+
+</form>
+
+<!-- [[ ${result} ]]
+<hr>
+[[ ${result2} ]] -->
+<script>
+  const submit = document.querySelector("[type=submit]");
+  // const submit = document.querySelector("[type=button]");
+  submit.addEventListener("click", login); //hoisting: 아래있는 함수호출
+  async function login(event) {
+    event.preventDefault();
+    // evnet.preventDefault(); <2>대체
+    const id = document.querySelector("[name=id]").value;
+    const pw = document.querySelector("[name=pw]").value;
+    const formData = new FormData();
+    formData.append("id", id);
+    formData.append("pw", pw);
+
+    const data = await fetch("/login", { method: 'post', body: formData }); //POST방식으로 서버에 로그인
+    const result = await data.text();
+    alert(result);
+    // document.body.innerHTML += result
+  }
+</script>
