@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -77,48 +79,45 @@ public class UploadController {
 
     @PostMapping("/upload2")
     @ResponseBody
-    public String upload2(@RequestParam("file") MultipartFile mFile) {
+    public String upload2(
+            @RequestParam("file") MultipartFile mFile) {
+
         String result = "";
         String oName = mFile.getOriginalFilename();
-        // 파일명의 중복되었을 때 이름변경// 중요 /// // // //
-        // String 클래스의 indexOf(), substring()
-        // 01234 index
-        // a.txt 업로드
-        // a 2 .txt
-        // .의 위치
-        int dotSpot = oName.indexOf(".");
-        // a
-        String fileName = oName.substring(0, dotSpot);
-        // .txt
-        String extension = oName.substring(dotSpot);
-        // oName = fileName + "2" + extension;
-        oName = fileName + " " + System.currentTimeMillis() + extension;
+
+        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+        Date now = new Date();
+        String date = sf.format(now);
+        System.out.println(date);
+
+        // 업로드될 폴더가 없다면 폴더 생성
+        File f = new File("c:/files/" + date);
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+
+        // 내일.. 중복파일이 존재하는지 검사+ 날짜선택
+        // a.jpg -> a.jpg48425987345
+        // a48425987345.jpg
+        File isFile = new File("c:/files/" + date + "/" + oName);
+        if (isFile.exists()) {
+            int 점의위치 = oName.lastIndexOf(".");
+            String 파일명 = oName.substring(0, 점의위치);
+            String 확장자 = oName.substring(점의위치);
+            oName = 파일명 + "__" + System.currentTimeMillis() + 확장자;
+        }
 
         try {
-            mFile.transferTo(new File("c:/springboot/" + oName));
+            // c:/files/2023-11-16/a.jpg 날짜선택
+            mFile.transferTo(new File("c:/files/" + date + "/" + oName));
+
         } catch (IllegalStateException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
         result += oName + "<br>" + mFile.getSize();
-        return result;
-    }
-
-    @GetMapping("/upload3")
-    public String upload3() {
-        return "upload3";
-    }
-
-    @PostMapping("/upload3")
-    @ResponseBody
-    public String upload3Post(@ModelAttribute FileInfo info) {
-        String result = "";
-        String oName = info.getFile().getOriginalFilename();
-        result += oName + "<br>" + info.getFile().getSize();
         return result;
     }
 
